@@ -234,6 +234,21 @@ const textUniTransLines: WorkCodeLine[] = [
   { n: 12, tokens: [cm('// 변환해주는 스타일링 툴')] },
 ];
 
+const vibeFormLines: WorkCodeLine[] = [
+  { n:  1, tokens: [cm('// 구글시트와 연결된 입력폼')] },
+  { n:  2, tokens: [] },
+  { n:  3, tokens: [kw('const'), tx(' '), nm('work_15'), tx(' = {')] },
+  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Google Sheets Form"'), tx(',')] },
+  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
+  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
+  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
+  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinvibeform.io"'), tx(',')] },
+  { n:  9, tokens: [tx('};')] },
+  { n: 10, tokens: [] },
+  { n: 11, tokens: [cm('// 구글시트와 실시간으로 연동되는')] },
+  { n: 12, tokens: [cm('// 데이터 입력폼 사이트')] },
+];
+
 const ALL_WORKS: WorkItem[] = [
   { lines: notionLines,         filename: 'notion_template.js',       status: 'LIVE', href: 'https://www.notion.com/ko/@capstone' },
   { lines: promptLines,         filename: 'prompt_generator_2.0.js',      status: 'LIVE', href: 'https://sinhumanprompt.figma.site' },
@@ -248,6 +263,7 @@ const ALL_WORKS: WorkItem[] = [
   { lines: windParticlesLines,  filename: 'wind_particles.js',        status: 'LIVE', href: 'https://sinwindwind.figma.site/' },
   { lines: discordAnsiLines,    filename: 'discord_ansi.js',          status: 'LIVE', href: 'https://sindisansi.figma.site/' },
   { lines: textUniTransLines,   filename: 'text_uni_trans.js',        status: 'LIVE', href: 'https://textunitrans.figma.site/' },
+  { lines: vibeFormLines,       filename: 'vibe_form.js',             status: 'LIVE', href: 'https://capstoneid.github.io/sinvibeform/' },
   { lines: shoppingMovieLines,  filename: 'shopping_movie.js',        status: 'STOP', href: 'https://claude.ai/public/artifacts/664680e9-56d7-44d2-a129-833870db72db' },
 ];
 
