@@ -350,7 +350,7 @@ export default function App() {
       
 
       {/* Floating works button */}
-      <a className="contact-fab" href="#works" aria-label="실무자의 바이브코딩" style={{ bottom: '88px' }}>
+      <a className="contact-fab" href="#works" aria-label="실무자의 바이브코딩" style={{ bottom: '88px', background: '#BFFF3C', color: '#0A0A0A' }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
         </svg>
@@ -358,7 +358,7 @@ export default function App() {
       </a>
 
       {/* Floating contact button */}
-      <button className="contact-fab" onClick={() => setContactOpen(true)} aria-label="문의 및 연락하기">
+      <button className="contact-fab" onClick={() => setContactOpen(true)} aria-label="문의 및 연락하기" style={{ background: '#BFFF3C', color: '#0A0A0A' }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
