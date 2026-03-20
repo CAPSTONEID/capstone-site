@@ -3,7 +3,7 @@
 :root {
   --black: #0A0A0A;
   --white: #F5F2EC;
-  --accent: #D4FF47;
+  --accent: #BFFF3C;
   --lime: #BFFF3C;
   --red: #FF3B30;
   --green: #00E87A;
@@ -185,8 +185,8 @@
 }
 
 .contact-popup-item:hover {
-  border-color: rgba(212, 255, 71, 0.3);
-  background: rgba(212, 255, 71, 0.04);
+  border-color: rgba(191, 255, 60, 0.3);
+  background: rgba(191, 255, 60, 0.04);
 }
 
 .contact-popup-type {
@@ -236,12 +236,12 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 24px rgba(212, 255, 71, 0.25);
+  box-shadow: 0 4px 24px rgba(191, 255, 60, 0.25);
 }
 
 .contact-fab:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(212, 255, 71, 0.4);
+  box-shadow: 0 8px 32px rgba(191, 255, 60, 0.4);
 }
 
 .contact-fab:active {
@@ -393,7 +393,7 @@
 
 .typing-cursor {
   display: inline-block;
-  color: #d4ff47;
+  color: #bfff3c;
   animation: cursorBlink 0.6s step-end infinite;
   font-size: 11px;
   vertical-align: baseline;
@@ -736,8 +736,8 @@
 }
 
 .principle-card:hover {
-  background: rgba(212,255,71,0.04);
-  border-color: rgba(212,255,71,0.2);
+  background: rgba(191,255,60,0.04);
+  border-color: rgba(191,255,60,0.2);
 }
 
 .principle-num {
@@ -1009,8 +1009,8 @@
 }
 
 .works-code-card:hover {
-  border-color: rgba(212, 255, 71, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(212, 255, 71, 0.08);
+  border-color: rgba(191, 255, 60, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(191, 255, 60, 0.08);
 }
 
 .works-code-header {

@@ -4,7 +4,7 @@ type Token = { color: string; text: string };
 
 const kw  = (t: string): Token => ({ color: '#ff79c6', text: t });
 const str = (t: string): Token => ({ color: '#d4ff47', text: t });
-const fn  = (t: string): Token => ({ color: '#50fa7b', text: t });
+const fn  = (t: string): Token => ({ color: '#bfff3c', text: t });
 const pr  = (t: string): Token => ({ color: '#8be9fd', text: t });
 const cm  = (t: string): Token => ({ color: '#6272a4', text: t });
 const nm  = (t: string): Token => ({ color: '#bd93f9', text: t });
@@ -289,7 +289,7 @@ function CodeCard({ lines, filename, status, href }: WorkItem) {
         <span
           className="works-code-badge"
           style={isLive
-            ? { background: 'rgba(80,250,123,0.12)', color: '#50fa7b', border: '1px solid rgba(80,250,123,0.3)' }
+            ? { background: 'rgba(191,255,60,0.12)', color: '#bfff3c', border: '1px solid rgba(191,255,60,0.3)' }
             : { background: 'rgba(255,85,85,0.12)',  color: '#ff5555', border: '1px solid rgba(255,85,85,0.3)' }
           }
         >
@@ -361,7 +361,7 @@ type TabType = 'ALL' | 'LIVE' | 'STOP';
 
 const TAB_CONFIG: Record<TabType, { borderActive: string; bgActive: string; colorActive: string; dot: string }> = {
   ALL:  { borderActive: 'rgba(189,147,249,0.4)', bgActive: 'rgba(189,147,249,0.15)', colorActive: '#bd93f9', dot: '#bd93f9' },
-  LIVE: { borderActive: 'rgba(80,250,123,0.4)',  bgActive: 'rgba(80,250,123,0.12)',  colorActive: '#50fa7b', dot: '#50fa7b' },
+  LIVE: { borderActive: 'rgba(80,250,123,0.4)',  bgActive: 'rgba(191,255,60,0.12)',  colorActive: '#50fa7b', dot: '#50fa7b' },
   STOP: { borderActive: 'rgba(255,85,85,0.4)',   bgActive: 'rgba(255,85,85,0.12)',   colorActive: '#ff5555', dot: '#ff5555' },
 };
 
