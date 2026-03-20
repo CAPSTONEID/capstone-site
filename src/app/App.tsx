@@ -83,7 +83,7 @@ export default function App() {
         <div className="hero-bottom-row">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h1 className="hero-title text-[64px] leading-[2.6] ml-[140px] mr-[0px] mt-[0px] mb-[32px]" style={{ fontFamily: "'Cafe24ClassicType', serif" }}>
-              실무를<br /><em>설계</em>하는<br />사람
+              <em style={{color:'#BFFF3C'}}>실무</em>를<br /><em style={{color:'#BFFF3C'}}>설계</em>하는<br /><em style={{color:'#BFFF3C'}}>사람</em>
             </h1>
             <h3
               className="font-bold"
@@ -219,28 +219,28 @@ export default function App() {
             </thead>
             <tbody>
               <tr className="group transition-colors duration-300 cursor-default">
-                <td className="transition-all duration-300 group-hover:!text-[var(--accent)] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[var(--accent)] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">AI 활용</td>
-                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-white/[0.03]">명확한 기획과 프로세스를 기반으로 업무 단계마다 AI가 고정된 루틴으로 작동되도록 설계</td>
+                <td className="transition-all duration-300 group-hover:!text-[#BFFF3C] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[#BFFF3C] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">AI 활용</td>
+                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-[#BFFF3C]/20">명확한 기획과 프로세스를 기반으로 업무 단계마다 AI가 고정된 루틴으로 작동되도록 설계</td>
               </tr>
               <tr className="group transition-colors duration-300 cursor-default">
-                <td className="transition-all duration-300 group-hover:!text-[var(--accent)] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[var(--accent)] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">바이브코딩</td>
-                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-white/[0.03]">코드를 직접 작성하지 않고 AI와의 대화만으로 실동작하는 툴·자동화 스크립트·인터페이스를 즉시 구현 — 아이디어를 프로토타입으로 전환하는 속도를 극단적으로 단축</td>
+                <td className="transition-all duration-300 group-hover:!text-[#BFFF3C] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[#BFFF3C] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">바이브코딩</td>
+                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-[#BFFF3C]/20">코드를 직접 작성하지 않고 AI와의 대화만으로 실동작하는 툴·자동화 스크립트·인터페이스를 즉시 구현 — 아이디어를 프로토타입으로 전환하는 속도를 극단적으로 단축</td>
               </tr>
               <tr className="group transition-colors duration-300 cursor-default">
-                <td className="transition-all duration-300 group-hover:!text-[var(--accent)] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[var(--accent)] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">운영 구조</td>
-                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-white/[0.03]">다양한 업무들이 한 화면에서 흐름이 보이는 대시보드를 구성하여 업무 모니터링 및 편의성, 생산성, 효율성 증대</td>
+                <td className="transition-all duration-300 group-hover:!text-[#BFFF3C] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[#BFFF3C] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">운영 구조</td>
+                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-[#BFFF3C]/20">다양한 업무들이 한 화면에서 흐름이 보이는 대시보드를 구성하여 업무 모니터링 및 편의성, 생산성, 효율성 증대</td>
               </tr>
               <tr className="group transition-colors duration-300 cursor-default">
-                <td className="transition-all duration-300 group-hover:!text-[var(--accent)] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[var(--accent)] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">콘텐츠 제작</td>
-                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-white/[0.03]">반복적인 콘텐츠 제작은 규격·템플릿 기반으로 재사용 가능한 구조설계 / 크리에이티브 콘텐츠는 모드보드를 통한 효율적 제작</td>
+                <td className="transition-all duration-300 group-hover:!text-[#BFFF3C] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[#BFFF3C] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">콘텐츠 제작</td>
+                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-[#BFFF3C]/20">반복적인 콘텐츠 제작은 규격·템플릿 기반으로 재사용 가능한 구조설계 / 크리에이티브 콘텐츠는 모드보드를 통한 효율적 제작</td>
               </tr>
               <tr className="group transition-colors duration-300 cursor-default">
-                <td className="transition-all duration-300 group-hover:!text-[var(--accent)] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[var(--accent)] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">의사결정</td>
-                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-white/[0.03]">데이터 및 지표가 보이는 구조로 실험·개선 반복하여 의사결정을 효과적, 효율적으로 진급</td>
+                <td className="transition-all duration-300 group-hover:!text-[#BFFF3C] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[#BFFF3C] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">의사결정</td>
+                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-[#BFFF3C]/20">데이터 및 지표가 보이는 구조로 실험·개선 반복하여 의사결정을 효과적, 효율적으로 진급</td>
               </tr>
               <tr className="group transition-colors duration-300 cursor-default">
-                <td className="transition-all duration-300 group-hover:!text-[var(--accent)] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[var(--accent)] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">프로세스</td>
-                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-white/[0.03]">선 기획 진행 후 프로세스를 노드화 하여 재현 가능한 규격으로 프로젝트의 진행 및 프로세스 설계</td>
+                <td className="transition-all duration-300 group-hover:!text-[#BFFF3C] relative before:absolute before:left-0 before:inset-y-0 before:w-[2px] before:bg-[#BFFF3C] before:scale-y-0 before:origin-top group-hover:before:scale-y-100 before:transition-transform before:duration-400">프로세스</td>
+                <td className="transition-colors duration-300 group-hover:!text-white group-hover:!bg-[#BFFF3C]/20">선 기획 진행 후 프로세스를 노드화 하여 재현 가능한 규격으로 프로젝트의 진행 및 프로세스 설계</td>
               </tr>
             </tbody>
           </table>

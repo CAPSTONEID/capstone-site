@@ -773,6 +773,23 @@
   padding: 40px;
   border: 1px solid rgba(255,255,255,0.06);
   background: var(--gray-1);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #BFFF3C;
+  transform: translateY(101%);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 0;
+}
+
+.tool-card:hover::before {
+  transform: translateY(0);
 }
 
 .tool-category {
@@ -782,6 +799,9 @@
   color: var(--accent);
   text-transform: uppercase;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s;
 }
 
 .tool-list {
@@ -790,6 +810,9 @@
   font-weight: 500;
   color: var(--white);
   margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s;
 }
 
 .tool-desc {
@@ -797,6 +820,15 @@
   color: var(--gray-3);
   font-weight: 300;
   font-style: italic;
+  position: relative;
+  z-index: 1;
+  transition: color 0.3s;
+}
+
+.tool-card:hover .tool-category,
+.tool-card:hover .tool-list,
+.tool-card:hover .tool-desc {
+  color: #0A0A0A;
 }
 
 .channels-grid {
@@ -820,7 +852,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--accent);
+  background: #BFFF3C;
   transform: translateY(101%);
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 0;
@@ -935,7 +967,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--accent);
+  background: #BFFF3C;
   transform: translateX(-100%);
   transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 0;
@@ -1136,7 +1168,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--accent);
+  background: #BFFF3C;
   transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   z-index: 0;
