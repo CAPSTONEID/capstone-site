@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실무자 — CAPSTONE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --black: #0A0A0A;
+    --white: #F5F2EC;
+    --accent: #D4FF47;
+    --red: #FF3B30;
+    --green: #00E87A;
+    --gray-1: #1A1A1A;
+    --gray-2: #2A2A2A;
+    --gray-3: #666;
+    --gray-4: #999;
+    --serif: 'Noto Serif KR', serif;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Noto Sans KR', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--sans);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999;
+  }
+
+  .header {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 48px;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo { font-family: var(--mono); font-size: 13px; letter-spacing: 0.15em; color: var(--gray-4); text-transform: uppercase; }
+  .logo span { color: var(--accent); }
+  .nav { display: flex; gap: 32px; list-style: none; }
+  .nav a { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--gray-4); text-decoration: none; text-transform: uppercase; transition: color 0.2s; }
+  .nav a:hover { color: var(--white); }
+
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative; overflow: hidden;
+  }
+
+  .hero-bg-text {
+    position: absolute; top: 50%; left: -0.05em;
+    transform: translateY(-50%);
+    font-family: var(--serif);
+    font-size: clamp(140px, 22vw, 320px);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.04);
+    white-space: nowrap; user-select: none; pointer-events: none;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    from { transform: translateY(-50%) translateX(0); }
+    to   { transform: translateY(-50%) translateX(-1%); }
+  }
+
+  .hero-eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 24px; animation: fadeUp 1s 0.2s both; }
+  .hero-title { font-family: var(--serif); font-size: clamp(52px, 8vw, 110px); font-weight: 700; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 32px; animation: fadeUp 1s 0.4s both; }
+  .hero-title em { font-style: normal; color: var(--accent); }
+  .hero-sub { font-family: var(--sans); font-size: clamp(15px, 1.8vw, 20px); color: var(--gray-4); font-weight: 300; max-width: 560px; line-height: 1.7; margin-bottom: 48px; animation: fadeUp 1s 0.6s both; }
+  .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeUp 1s 0.8s both; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-decoration: none; text-transform: uppercase; transition: all 0.25s; }
+  .btn-primary { background: var(--accent); color: var(--black); font-weight: 700; }
+  .btn-primary:hover { background: #fff; transform: translateY(-2px); }
+  .btn-ghost { border: 1px solid rgba(255,255,255,0.2); color: var(--white); }
+  .btn-ghost:hover { border-color: var(--white); background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+
+  .hero-scroll { position: absolute; right: 48px; bottom: 80px; display: flex; flex-direction: column; align-items: center; gap: 12px; animation: fadeUp 1s 1.2s both; }
+  .scroll-text { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; color: var(--gray-3); text-transform: uppercase; writing-mode: vertical-rl; }
+  .scroll-line { width: 1px; height: 60px; background: linear-gradient(var(--gray-3), transparent); animation: scrollPulse 2s ease-in-out infinite; }
+
+  @keyframes scrollPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+  section { padding: 120px 48px; }
+  .section-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; margin-bottom: 64px; display: flex; align-items: center; gap: 16px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+
+  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+  .about-quote { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 48px); font-weight: 400; line-height: 1.3; position: relative; padding-left: 32px; }
+  .about-quote::before { content: '"'; position: absolute; left: 0; top: -0.15em; font-size: 4em; color: var(--accent); opacity: 0.6; line-height: 1; font-family: var(--serif); }
+  .about-body { color: var(--gray-4); font-size: 15px; line-height: 1.9; font-weight: 300; }
+  .about-body p + p { margin-top: 16px; }
+  .about-body strong { color: var(--white); font-weight: 500; }
+
+  .diagnosis { background: var(--gray-1); border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .diag-card { padding: 48px; position: relative; overflow: hidden; }
+  .diag-card-red { background: rgba(255,59,48,0.05); border: 1px solid rgba(255,59,48,0.15); }
+  .diag-card-green { background: rgba(0,232,122,0.04); border: 1px solid rgba(0,232,122,0.12); }
+  .diag-indicator { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 24px; }
+  .diag-indicator.red { background: var(--red); box-shadow: 0 0 12px var(--red); }
+  .diag-indicator.green { background: var(--green); box-shadow: 0 0 12px var(--green); }
+  .diag-title { font-family: var(--serif); font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+  .diag-title.red { color: var(--red); }
+  .diag-title.green { color: var(--green); }
+  .diag-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+  .diag-list li { font-size: 14px; color: var(--gray-4); line-height: 1.6; font-weight: 300; padding-left: 20px; position: relative; }
+  .diag-list li::before { position: absolute; left: 0; }
+  .diag-card-red .diag-list li::before { content: '—'; color: var(--red); }
+  .diag-card-green .diag-list li::before { content: '→'; color: var(--green); }
+
+  .work-table { width: 100%; border-collapse: collapse; }
+  .work-table th, .work-table td { padding: 20px 24px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+  .work-table th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-3); background: var(--gray-1); }
+  .work-table td:first-child { color: var(--gray-4); font-weight: 500; font-size: 13px; width: 160px; }
+  .work-table td:nth-child(2) { color: var(--gray-3); font-weight: 300; }
+  .work-table td:nth-child(3) { color: var(--white); font-weight: 400; }
+  .work-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .principles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .principle-card { padding: 48px 40px; background: var(--gray-1); border: 1px solid rgba(255,255,255,0.06); transition: background 0.3s; }
+  .principle-card:hover { background: rgba(212,255,71,0.04); border-color: rgba(212,255,71,0.2); }
+  .principle-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--accent); margin-bottom: 20px; }
+  .principle-title { font-family: var(--serif); font-size: 20px; font-weight: 700; margin-bottom: 16px; line-height: 1.3; }
+  .principle-body { font-size: 14px; color: var(--gray-4); line-height: 1.8; font-weight: 300; }
+
+  .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .tool-card { padding: 40px; border: 1px solid rgba(255,255,255,0.06); background: var(--gray-1); }
+  .tool-category { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
+  .tool-list { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--white); margin-bottom: 12px; }
+  .tool-desc { font-size: 13px; color: var(--gray-3); font-weight: 300; font-style: italic; }
+
+  .channels-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .channel-card { padding: 48px; border: 1px solid rgba(255,255,255,0.06); background: var(--gray-1); text-decoration: none; display: block; transition: all 0.3s; position: relative; overflow: hidden; }
+  .channel-card::before { content: ''; position: absolute; inset: 0; background: var(--accent); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: 0; }
+  .channel-card:hover::before { transform: translateY(0); }
+  .channel-card:hover .channel-platform, .channel-card:hover .channel-name, .channel-card:hover .channel-desc { color: var(--black); }
+  .channel-platform { position: relative; z-index: 1; font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--gray-3); text-transform: uppercase; margin-bottom: 16px; transition: color 0.3s; }
+  .channel-name { position: relative; z-index: 1; font-family: var(--serif); font-size: 32px; font-weight: 700; color: var(--white); margin-bottom: 12px; transition: color 0.3s; }
+  .channel-desc { position: relative; z-index: 1; font-size: 14px; color: var(--gray-4); line-height: 1.7; font-weight: 300; transition: color 0.3s; }
+
+  .contact { text-align: center; padding: 120px 48px 160px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .contact-big { font-family: var(--serif); font-size: clamp(36px, 6vw, 80px); font-weight: 900; line-height: 1.1; margin-bottom: 24px; }
+  .contact-big em { font-style: normal; color: var(--accent); }
+  .contact-sub { font-size: 16px; color: var(--gray-4); font-weight: 300; margin-bottom: 48px; }
+  .contact-links { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; }
+  .contact-link { font-family: var(--mono); font-size: 13px; letter-spacing: 0.1em; color: var(--gray-4); text-decoration: none; padding: 12px 0; border-bottom: 1px solid var(--gray-3); transition: all 0.2s; }
+  .contact-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .footer { padding: 24px 48px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; }
+  .footer-text { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--gray-3); text-transform: uppercase; }
+
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0 48px; }
+
+  .templates-card { border: 1px solid rgba(212,255,71,0.2); background: rgba(212,255,71,0.03); padding: 56px; display: flex; justify-content: space-between; align-items: center; gap: 40px; flex-wrap: wrap; }
+  .templates-text h3 { font-family: var(--serif); font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+  .templates-text p { font-size: 14px; color: var(--gray-4); font-weight: 300; line-height: 1.7; max-width: 480px; }
+
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    .header { padding: 16px 24px; }
+    .nav { display: none; }
+    .hero { padding: 0 24px 60px; }
+    .hero-scroll { display: none; }
+    section { padding: 80px 24px; }
+    .about, .diag-grid, .principles-grid, .tools-grid, .channels-grid { grid-template-columns: 1fr; }
+    .about { gap: 40px; }
+    .templates-card { flex-direction: column; }
+    .divider { margin: 0 24px; }
+    .footer { padding: 24px; flex-direction: column; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><span>CAPSTONE</span> · 실무자</div>
+  <nav>
+    <ul class="nav">
+      <li><a href="#about">소개</a></li>
+      <li><a href="#work">작업</a></li>
+      <li><a href="#tools">도구</a></li>
+      <li><a href="#channels">채널</a></li>
+      <li><a href="#contact">연락</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-bg-text">실무자</div>
+  <div class="hero-eyebrow">AI × 시스템 × 콘텐츠</div>
+  <h1 class="hero-title">실무를<br><em>설계</em>하는<br>사람</h1>
+  <p class="hero-sub">Notion 시스템 설계, AI 실무 적용, 콘텐츠 프로세스 구축—<br>반복되는 업무를 구조화해 더 빠르고 정확하게 실행합니다.</p>
+  <div class="hero-cta">
+    <a href="#contact" class="btn btn-primary">프로젝트 문의 →</a>
+    <a href="#about" class="btn btn-ghost">더 알아보기</a>
+  </div>
+  <div class="hero-scroll">
+    <span class="scroll-text">scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="about">
+  <div class="section-label">01 — 소개</div>
+  <div class="about reveal">
+    <div class="about-quote">좋은 시스템이<br>좋은 결과를<br>만든다</div>
+    <div class="about-body">
+      <p>안녕하세요, <strong>실무자 — CAPSTONE</strong>입니다.</p>
+      <p>마케팅·콘텐츠 전략과 Notion 시스템 설계를 중심으로 활동하는 <strong>1인 크리에이터이자 실무 기획자</strong>입니다.</p>
+      <p>브랜드의 비즈니스 목표를 달성하기 위한 <strong>전체 프로세스 설계</strong>부터 콘텐츠 제작, 광고 운영, 데이터 분석까지 퍼널 단위로 직접 기획하고 실행합니다.</p>
+      <p>현재는 자동차 브랜드(테슬라·폴스타) 관련 B2C/B2B 마케팅 프로젝트를 리드하고 있으며, AI 서비스를 실무 파이프라인에 깊게 결합해 <strong>프롬프트 엔지니어링</strong>과 <strong>AI 에이전트 활용</strong>을 통한 업무 자동화를 지속적으로 연구·적용하고 있습니다.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="diagnosis">
+  <div class="section-label">02 — 당신의 상태 확인</div>
+  <div class="diag-grid reveal">
+    <div class="diag-card diag-card-red">
+      <div class="diag-indicator red"></div>
+      <div class="diag-title red">이 중 하나라도 해당되면 맞습니다</div>
+      <ul class="diag-list">
+        <li>AI 툴은 많이 쓰는데, 업무 흐름에 제대로 고정된 게 없다</li>
+        <li>노션을 쓰지만 결국 문서만 쌓이는 창고가 됐다</li>
+        <li>콘텐츠나 프로젝트가 반복되는데, 매번 처음부터 다시 만들고 있다</li>
+        <li>어떤 툴을 써야 할지보다, 어떻게 연결해야 할지를 모르겠다</li>
+        <li>작업은 많은데, 내가 지금 뭘 하고 있는지 한눈에 안 보인다</li>
+      </ul>
+    </div>
+    <div class="diag-card diag-card-green">
+      <div class="diag-indicator green"></div>
+      <div class="diag-title green">이런 목적이면 더 잘 맞습니다</div>
+      <ul class="diag-list">
+        <li>툴 추천이 아니라, 작동하는 흐름을 원한다</li>
+        <li>실무 속도를 올리는 구조(시스템)가 필요하다</li>
+        <li>AI를 쓰고 싶은데, 어디에 어떻게 끼워 넣어야 할지 모르겠다</li>
+        <li>노션 대시보드/DB를 제대로 된 운영 도구로 쓰고 싶다</li>
+        <li>콘텐츠를 만들 때 재사용·멀티유즈 구조를 갖추고 싶다</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="work">
+  <div class="section-label">03 — 내가 실제로 하는 일</div>
+  <div class="reveal">
+    <table class="work-table">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>Before — 지금 상태</th>
+          <th>After — 내가 만드는 결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>AI 활용</td><td>툴은 많은데 업무에 따로 논다</td><td>업무 단계마다 AI가 고정된 루틴으로 작동</td></tr>
+        <tr><td>운영 구조</td><td>작업이 여기저기 흩어져 있다</td><td>한 화면에서 흐름이 보이는 대시보드</td></tr>
+        <tr><td>콘텐츠 제작</td><td>매번 처음부터, 비슷한 것도 새로 만든다</td><td>규격·템플릿 기반으로 재사용 가능한 구조</td></tr>
+        <tr><td>의사결정</td><td>감과 경험으로 판단</td><td>지표가 보이는 구조로 실험·개선 반복</td></tr>
+        <tr><td>프로세스</td><td>사람마다 방식이 다르고, 누락이 생긴다</td><td>재현 가능한 규격으로 누구든 같은 흐름</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section>
+  <div class="section-label">04 — 작업 원칙</div>
+  <div class="principles-grid">
+    <div class="principle-card reveal">
+      <div class="principle-num">PRINCIPLE / 01</div>
+      <h3 class="principle-title">툴을 고르기 전에,<br>업무를 단계로 쪼갠다</h3>
+      <p class="principle-body">어떤 툴이든 업무 단계가 먼저 정의되지 않으면, 도구는 그냥 메모장이 됩니다. 단계를 먼저 쪼개면, 어디에 무엇을 끼워 넣어야 할지가 보입니다.</p>
+    </div>
+    <div class="principle-card reveal" style="transition-delay:0.1s">
+      <div class="principle-num">PRINCIPLE / 02</div>
+      <h3 class="principle-title">결과물보다<br>구조를 먼저 만든다</h3>
+      <p class="principle-body">보고서 한 장보다, 그 보고서를 다음에도 5분 만에 만들 수 있는 템플릿과 DB가 더 가치 있습니다. 재사용 가능성이 생산성의 실체입니다.</p>
+    </div>
+    <div class="principle-card reveal" style="transition-delay:0.2s">
+      <div class="principle-num">PRINCIPLE / 03</div>
+      <h3 class="principle-title">설명보다 작동하는<br>예시를 먼저 보여준다</h3>
+      <p class="principle-body">백 번 설명하는 것보다, 실제로 작동하는 노션 페이지 하나를 보여주는 게 낫습니다. 제가 만든 결과물을 직접 열어보고 판단하세요.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="tools">
+  <div class="section-label">05 — 다루는 도구</div>
+  <div class="tools-grid reveal">
+    <div class="tool-card">
+      <div class="tool-category">AI Services</div>
+      <div class="tool-list">Gemini · Claude · Grok · Higgsfield</div>
+      <p class="tool-desc">→ 프롬프트 설계, 업무 단계 자동화, 콘텐츠 초안 생성</p>
+    </div>
+    <div class="tool-card">
+      <div class="tool-category">Design & Collaboration</div>
+      <div class="tool-list">Figma · Notion · Discord</div>
+      <p class="tool-desc">→ 시스템 설계, 대시보드 구축, DB 설계, 팀 운영</p>
+    </div>
+  </div>
+  <div style="margin-top: 2px;">
+    <div class="templates-card reveal">
+      <div class="templates-text">
+        <h3>📦 노션 템플릿</h3>
+        <p>제가 실제 업무에 쓰는 구조를 템플릿으로 만들어 공개·판매하고 있습니다. 무료 배포본도 있으니 먼저 열어보고 판단하세요.</p>
+      </div>
+      <a href="https://notion.com/@capstone" target="_blank" class="btn btn-primary">notion.com/@capstone →</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="channels">
+  <div class="section-label">06 — 채널 소개</div>
+  <div class="channels-grid reveal">
+    <a href="https://youtube.com/@실무자" target="_blank" class="channel-card">
+      <div class="channel-platform">YouTube</div>
+      <div class="channel-name">@실무자</div>
+      <p class="channel-desc">영상 촬영·편집, 각종 툴의 실무 활용법, AI 정보·팁, 업무 노하우를 다룹니다.</p>
+    </a>
+    <a href="https://instagram.com/id.capstone" target="_blank" class="channel-card">
+      <div class="channel-platform">Instagram</div>
+      <div class="channel-name">@id.capstone</div>
+      <p class="channel-desc">짧은 실무 팁, 작업 과정, 도구 활용 사례를 올립니다. 빠르게 스타일을 확인하기 좋습니다.</p>
+    </a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="contact" id="contact">
+  <div class="reveal">
+    <h2 class="contact-big">같이 만들어볼<br><em>준비 되셨나요?</em></h2>
+    <p class="contact-sub">작동하는 시스템, 재사용 가능한 구조, AI가 녹아든 실무 흐름이 필요하다면</p>
+    <div class="contact-links">
+      <a href="mailto:project@capstone.id" class="contact-link">📬 project@capstone.id</a>
+      <a href="https://youtube.com/@실무자" target="_blank" class="contact-link">🎬 YouTube @실무자</a>
+      <a href="https://instagram.com/id.capstone" target="_blank" class="contact-link">📷 Instagram @id.capstone</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <span class="footer-text">© 2026 CAPSTONE · 실무자</span>
+  <span class="footer-text">AI × 시스템 × 콘텐츠</span>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
