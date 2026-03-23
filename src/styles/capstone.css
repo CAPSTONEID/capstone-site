@@ -1228,10 +1228,6 @@
 
 @media (max-width: 768px) {
 
-  .hero-subtitle {
-  left: 0 !important;
-  margin-left: 0 !important;
-}
   .capstone-header {
     padding: 16px 24px;
   }
@@ -1280,6 +1276,10 @@
   }
   .ig-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .hero-subtitle {
+    left: 0 !important;
+    margin-left: 0 !important;
   }
 }
 
