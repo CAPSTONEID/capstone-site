@@ -1227,6 +1227,11 @@
 }
 
 @media (max-width: 768px) {
+
+  .hero-subtitle {
+  left: 0 !important;
+  margin-left: 0 !important;
+}
   .capstone-header {
     padding: 16px 24px;
   }
