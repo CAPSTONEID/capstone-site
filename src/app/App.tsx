@@ -86,7 +86,7 @@ export default function App() {
               <em style={{color:'#BFFF3C'}}>실무</em>를<br /><em style={{color:'#BFFF3C'}}>설계</em>하는<br /><em style={{color:'#BFFF3C'}}>사람</em>
             </h1>
             <h3
-              className="font-bold"
+              className="font-bold hero-subtitle"
               style={{
                 color: '#ffffff',
                 fontSize: `${heroP.fontSize}px`,
