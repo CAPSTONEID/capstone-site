@@ -1274,7 +1274,7 @@
     flex-direction: column;
     gap: 8px;
   }
-  .ig-grid {
+.ig-grid {
     grid-template-columns: repeat(3, 1fr);
   }
   .hero-subtitle {
