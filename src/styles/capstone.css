@@ -1277,8 +1277,14 @@
 .ig-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  .hero-subtitle {
+.hero-subtitle {
     left: 0 !important;
+    margin-left: 0 !important;
+  }
+  .hero-title {
+    margin-left: 0 !important;
+  }
+  .hero-eyebrow {
     margin-left: 0 !important;
   }
 }
