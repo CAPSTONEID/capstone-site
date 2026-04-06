@@ -26,3 +26,11 @@ export interface WorkRecord {
 }
 
 export type WorkInsert = Omit<WorkRecord, 'id' | 'created_at' | 'updated_at'>;
+
+export interface CategoryRecord {
+  id: string;
+  name: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}

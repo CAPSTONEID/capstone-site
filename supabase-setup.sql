@@ -77,7 +77,38 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 -- =============================================
--- 6. 기존 테이블에 컬럼 추가 (이미 테이블이 있는 경우 실행)
+-- 6. 카테고리 테이블 생성
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.categories (
+  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       text        NOT NULL UNIQUE,
+  sort_order integer     NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS set_categories_updated_at ON public.categories;
+CREATE TRIGGER set_categories_updated_at
+  BEFORE UPDATE ON public.categories
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public read categories" ON public.categories;
+CREATE POLICY "public read categories" ON public.categories
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "auth manage categories" ON public.categories;
+CREATE POLICY "auth manage categories" ON public.categories
+  FOR ALL USING (auth.role() = 'authenticated');
+
+-- 기본 카테고리 데이터 ('미분류'는 항상 맨 처음)
+INSERT INTO public.categories (name, sort_order) VALUES
+  ('미분류', 0)
+ON CONFLICT (name) DO NOTHING;
+
+-- =============================================
+-- 7. 기존 테이블에 컬럼 추가 (이미 테이블이 있는 경우 실행)
 -- =============================================
 -- ALTER TABLE public.works ADD COLUMN IF NOT EXISTS main_category text NOT NULL DEFAULT '미분류';
 -- ALTER TABLE public.works ADD COLUMN IF NOT EXISTS is_featured boolean NOT NULL DEFAULT false;

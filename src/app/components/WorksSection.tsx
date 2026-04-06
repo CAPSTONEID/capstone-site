@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase, type WorkRecord } from '../../lib/supabase';
+import { supabase, type WorkRecord, type CategoryRecord } from '../../lib/supabase';
 import { generateLines, type WorkCodeLine } from '../../lib/worksHelpers';
 
 /* ─── CodeCard 컴포넌트 ─── */
@@ -134,28 +134,36 @@ function recordToWorkItem(record: WorkRecord): WorkItem {
 export function WorksSection() {
   const [activeTab, setActiveTab] = useState<string>('추천');
   const [allRecords, setAllRecords] = useState<WorkRecord[]>([]);
+  const [categoryOrder, setCategoryOrder] = useState<CategoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from('works')
-      .select('*')
-      .order('sort_order', { ascending: true })
-      .then(({ data }) => {
-        if (data) setAllRecords(data);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase.from('works').select('*').order('sort_order', { ascending: true }),
+      supabase.from('categories').select('*').order('sort_order', { ascending: true }),
+    ]).then(([{ data: works }, { data: cats }]) => {
+      if (works) setAllRecords(works);
+      if (cats) setCategoryOrder(cats);
+      setLoading(false);
+    });
   }, []);
 
-  /* 동적 카테고리 탭 목록 */
+  /* categories 테이블 순서 기준으로 탭 정렬, 작업물이 있는 것만 표시 */
   const dynamicCategories = useMemo(() => {
-    const cats = [...new Set(allRecords.map(r => r.main_category ?? '미분류'))];
-    return cats.sort((a, b) => {
+    const usedCats = new Set(allRecords.map(r => r.main_category ?? '미분류'));
+    if (categoryOrder.length > 0) {
+      // categories 테이블 순서 따름 + 테이블에 없는 카테고리는 뒤에 추가
+      const ordered = categoryOrder.map(c => c.name).filter(n => usedCats.has(n));
+      const extras = [...usedCats].filter(c => !categoryOrder.some(cat => cat.name === c));
+      return [...ordered, ...extras];
+    }
+    // categories 테이블 없으면 기존 방식 (미분류 먼저)
+    return [...usedCats].sort((a, b) => {
       if (a === '미분류') return -1;
       if (b === '미분류') return 1;
       return a.localeCompare(b, 'ko');
     });
-  }, [allRecords]);
+  }, [allRecords, categoryOrder]);
 
   const tabs = useMemo(() => ['추천', '전체', ...dynamicCategories], [dynamicCategories]);
 

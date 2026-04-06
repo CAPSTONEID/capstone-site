@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase, type WorkRecord, type WorkInsert } from '../../lib/supabase';
 import { generateLines } from '../../lib/worksHelpers';
+import { CategoryManager } from './CategoryManager';
 
 /* ── 색상 팔레트 ── */
 const C = {
@@ -332,6 +333,7 @@ function WorkForm({
 
 /* ─── 대시보드 ─── */
 function Dashboard({ onLogout }: { onLogout: () => void }) {
+  const [activeView, setActiveView] = useState<'works' | 'categories'>('works');
   const [works, setWorks] = useState<WorkRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -420,9 +422,34 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     <div style={css.page}>
       {/* 헤더 */}
       <div style={css.header}>
-        <div>
-          <span style={{ fontSize: 11, color: C.textMuted, letterSpacing: '0.15em' }}>CAPSTONE · ADMIN</span>
-          <span style={{ fontSize: 14, color: C.green, fontWeight: 700, marginLeft: 16 }}>작업물 관리</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+          <span style={{ fontSize: 11, color: C.textMuted, letterSpacing: '0.15em', marginRight: 20 }}>CAPSTONE · ADMIN</span>
+          {/* 뷰 전환 탭 */}
+          {(['works', 'categories'] as const).map(view => {
+            const label = view === 'works' ? '작업물 관리' : '카테고리 관리';
+            const isActive = activeView === view;
+            return (
+              <button
+                key={view}
+                onClick={() => setActiveView(view)}
+                style={{
+                  padding: '8px 18px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: `2px solid ${isActive ? C.green : 'transparent'}`,
+                  color: isActive ? C.green : C.textMuted,
+                  fontSize: 13,
+                  fontWeight: isActive ? 700 : 400,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  letterSpacing: '0.03em',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontSize: 11, color: C.textMuted }}>
@@ -440,7 +467,11 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         </div>
       )}
 
-      <div style={{ padding: '24px 32px' }}>
+      {/* 카테고리 관리 뷰 */}
+      {activeView === 'categories' && <CategoryManager />}
+
+      {/* 작업물 관리 뷰 */}
+      {activeView === 'works' && <div style={{ padding: '24px 32px' }}>
         {/* 탭 필터 + 추가 버튼 */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -552,10 +583,10 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             ))}
           </div>
         )}
-      </div>
+      </div>}
 
       {/* 폼 모달 */}
-      {showForm && (
+      {showForm && activeView === 'works' && (
         <WorkForm
           initial={editTarget}
           onSave={handleSave}
