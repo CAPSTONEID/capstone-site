@@ -22,7 +22,7 @@ interface CategoryWithCount extends CategoryRecord {
   work_count: number;
 }
 
-export function CategoryManager() {
+export function CategoryManager({ onCategoryChange }: { onCategoryChange?: () => void }) {
   const [categories, setCategories] = useState<CategoryWithCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
@@ -71,6 +71,7 @@ export function CategoryManager() {
     setNewName('');
     flash(`"${name}" 카테고리 추가 완료 ✓`);
     fetchCategories();
+    onCategoryChange?.();
   }
 
   /* ── 수정 (이름 변경) ── */
@@ -97,6 +98,7 @@ export function CategoryManager() {
     setEditingId(null);
     flash(`"${cat.name}" → "${newNameTrimmed}" 변경 완료 ✓`);
     fetchCategories();
+    onCategoryChange?.();
   }
 
   /* ── 삭제 ── */
@@ -115,6 +117,7 @@ export function CategoryManager() {
     await supabase.from('categories').delete().eq('id', cat.id);
     flash(`"${cat.name}" 삭제 완료`);
     fetchCategories();
+    onCategoryChange?.();
   }
 
   /* ── 순서 이동 ── */

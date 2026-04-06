@@ -335,20 +335,25 @@ function WorkForm({
 function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [activeView, setActiveView] = useState<'works' | 'categories'>('works');
   const [works, setWorks] = useState<WorkRecord[]>([]);
+  const [categoryNames, setCategoryNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<WorkRecord | undefined>();
   const [msg, setMsg] = useState('');
   const [filterTab, setFilterTab] = useState<string>('전체');
 
-  async function fetchWorks() {
+  async function fetchAll() {
     setLoading(true);
-    const { data } = await supabase.from('works').select('*').order('sort_order', { ascending: true });
-    setWorks(data ?? []);
+    const [{ data: worksData }, { data: catsData }] = await Promise.all([
+      supabase.from('works').select('*').order('sort_order', { ascending: true }),
+      supabase.from('categories').select('name, sort_order').order('sort_order', { ascending: true }),
+    ]);
+    setWorks(worksData ?? []);
+    setCategoryNames((catsData ?? []).map(c => c.name));
     setLoading(false);
   }
 
-  useEffect(() => { fetchWorks(); }, []);
+  useEffect(() => { fetchAll(); }, []);
 
   function flash(text: string) {
     setMsg(text);
@@ -365,14 +370,14 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     }
     setShowForm(false);
     setEditTarget(undefined);
-    fetchWorks();
+    fetchAll();
   }
 
   async function handleDelete(id: string, filename: string) {
     if (!confirm(`"${filename}" 을 삭제하시겠습니까?`)) return;
     await supabase.from('works').delete().eq('id', id);
     flash('삭제 완료');
-    fetchWorks();
+    fetchAll();
   }
 
   async function moveOrder(work: WorkRecord, dir: 'up' | 'down') {
@@ -384,23 +389,23 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       supabase.from('works').update({ sort_order: swap.sort_order }).eq('id', work.id),
       supabase.from('works').update({ sort_order: work.sort_order }).eq('id', swap.id),
     ]);
-    fetchWorks();
+    fetchAll();
   }
 
   async function toggleFeatured(work: WorkRecord) {
     await supabase.from('works').update({ is_featured: !work.is_featured, updated_at: new Date().toISOString() }).eq('id', work.id);
-    fetchWorks();
+    fetchAll();
   }
 
-  /* 카테고리 목록 */
+  /* categories 테이블 기준 목록 (순서 유지) + works에만 있는 고아 카테고리 병합 */
   const existingCategories = useMemo(() => {
-    const cats = [...new Set(works.map(w => w.main_category ?? '미분류'))];
-    return cats.sort((a, b) => {
-      if (a === '미분류') return -1;
-      if (b === '미분류') return 1;
-      return a.localeCompare(b, 'ko');
-    });
-  }, [works]);
+    const fromWorks = [...new Set(works.map(w => w.main_category ?? '미분류'))];
+    const merged = [
+      ...categoryNames,
+      ...fromWorks.filter(c => !categoryNames.includes(c)),
+    ];
+    return merged;
+  }, [categoryNames, works]);
 
   const dashTabs = ['전체', '추천', ...existingCategories];
 
@@ -468,7 +473,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       )}
 
       {/* 카테고리 관리 뷰 */}
-      {activeView === 'categories' && <CategoryManager />}
+      {activeView === 'categories' && <CategoryManager onCategoryChange={fetchAll} />}
 
       {/* 작업물 관리 뷰 */}
       {activeView === 'works' && <div style={{ padding: '24px 32px' }}>
