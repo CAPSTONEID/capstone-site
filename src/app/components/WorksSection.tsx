@@ -279,6 +279,22 @@ const convertImageLines: WorkCodeLine[] = [
   { n: 12, tokens: [cm('// 간편하게 변환하는 컨버터')] },
 ];
 
+const qrTreeLines: WorkCodeLine[] = [
+  { n:  1, tokens: [cm('// QR 트리제작기')] },
+  { n:  2, tokens: [] },
+  { n:  3, tokens: [kw('const'), tx(' '), nm('work_18'), tx(' = {')] },
+  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"QR Tree Generator"'), tx(',')] },
+  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
+  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
+  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
+  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"capstoneid.id/sinsqrtree/"'), tx(',')] },
+  { n:  9, tokens: [tx('};')] },
+  { n: 10, tokens: [] },
+  { n: 11, tokens: [cm('// QR코드를 트리 형태로')] },
+  { n: 12, tokens: [cm('// 시각화하는 제작 도구')] },
+];
+
+
 const ALL_WORKS: WorkItem[] = [
   { lines: notionLines,         filename: 'notion_template.js',       status: 'LIVE', href: 'https://www.notion.com/ko/@capstone' },
   { lines: promptLines,         filename: 'prompt_generator_2.0.js',      status: 'LIVE', href: 'https://sinhumanprompt.figma.site' },
@@ -297,6 +313,7 @@ const ALL_WORKS: WorkItem[] = [
   { lines: shoppingMovieLines,  filename: 'shopping_movie.js',        status: 'STOP', href: 'https://claude.ai/public/artifacts/664680e9-56d7-44d2-a129-833870db72db' },
   { lines: mp4ToGifLines,       filename: 'mp4_to_gif_converter.js',  status: 'LIVE', href: 'https://capstoneid.github.io/sinconvertmp4togif/' },
   { lines: convertImageLines,   filename: 'image_convert.js',         status: 'LIVE', href: 'https://capstoneid.github.io/convertimage/' },
+  { lines: qrTreeLines,         filename: 'qr_tree_generator.js',      status: 'LIVE', href: 'https://capstoneid.github.io/sinsqrtree/' },
 ];
 
 /* ─── CodeCard 컴포넌트 ─── */
