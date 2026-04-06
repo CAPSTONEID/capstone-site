@@ -599,9 +599,112 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   );
 }
 
+/* ─── DB 설치 안내 화면 ─── */
+const SETUP_SQL = `-- categories 테이블 생성
+CREATE TABLE IF NOT EXISTS public.categories (
+  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       text        NOT NULL UNIQUE,
+  sort_order integer     NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN NEW.updated_at = now(); RETURN NEW; END;
+$$;
+
+DROP TRIGGER IF EXISTS set_categories_updated_at ON public.categories;
+CREATE TRIGGER set_categories_updated_at
+  BEFORE UPDATE ON public.categories
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "public read categories" ON public.categories
+  FOR SELECT USING (true);
+CREATE POLICY "auth manage categories" ON public.categories
+  FOR ALL USING (auth.role() = 'authenticated');
+
+INSERT INTO public.categories (name, sort_order)
+  VALUES ('미분류', 0)
+  ON CONFLICT (name) DO NOTHING;`;
+
+const WORKS_SQL = `-- works 테이블 생성 (최초 설치)
+-- supabase-setup.sql 파일 전체를 실행하세요.`;
+
+function SetupScreen({ missing, onRetry }: { missing: ('works' | 'categories')[]; onRetry: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const sql = missing.includes('works') ? WORKS_SQL : SETUP_SQL;
+
+  function copy() {
+    navigator.clipboard.writeText(sql).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily: '"JetBrains Mono", monospace, sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ maxWidth: 640, width: '100%' }}>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ fontSize: 11, color: C.textMuted, letterSpacing: '0.15em', marginBottom: 8 }}>CAPSTONE · ADMIN · 초기 설정</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: C.orange, marginBottom: 12 }}>
+            DB 테이블 설정이 필요합니다
+          </div>
+          <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.7 }}>
+            아래 테이블이 Supabase에 없습니다:{' '}
+            {missing.map(m => (
+              <span key={m} style={{ color: C.red, marginLeft: 6, padding: '1px 8px', border: `1px solid rgba(255,85,85,0.3)`, borderRadius: 4, fontSize: 12 }}>
+                {m}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 20, padding: 20, background: C.surface, borderRadius: 10, border: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <span style={{ fontSize: 11, color: C.textMuted, letterSpacing: '0.08em' }}>
+              Supabase 대시보드 → SQL Editor에 붙여넣기 후 실행
+            </span>
+            <button
+              onClick={copy}
+              style={{ padding: '5px 12px', borderRadius: 5, border: `1px solid ${copied ? 'rgba(191,255,60,0.4)' : C.border}`, background: copied ? 'rgba(191,255,60,0.1)' : 'transparent', color: copied ? C.green : C.textMuted, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
+            >
+              {copied ? '복사됨 ✓' : '복사하기'}
+            </button>
+          </div>
+          <pre style={{ margin: 0, fontSize: 11, lineHeight: 1.7, color: C.cyan, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {sql}
+          </pre>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={onRetry}
+            style={{ flex: 1, padding: '12px', background: C.green, color: '#0a0a0a', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            SQL 실행 완료 → 재확인
+          </button>
+          <a
+            href="https://supabase.com/dashboard/project/mcavbnmmfyypcwmacoag/sql/new"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ padding: '12px 20px', background: 'transparent', color: C.purple, border: `1px solid rgba(189,147,249,0.3)`, borderRadius: 8, fontSize: 12, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
+          >
+            SQL Editor 열기 ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── AdminPage 진입점 ─── */
 export default function AdminPage() {
   const [session, setSession] = useState<boolean | null>(null);
+  const [dbStatus, setDbStatus] = useState<'checking' | 'ok' | 'missing'>('checking');
+  const [missingTables, setMissingTables] = useState<('works' | 'categories')[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(!!data.session));
@@ -609,7 +712,30 @@ export default function AdminPage() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (session === null) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', color: '#6272a4', fontSize: 13 }}>Loading...</div>;
+  async function checkDB() {
+    setDbStatus('checking');
+    const [worksRes, catsRes] = await Promise.all([
+      supabase.from('works').select('id').limit(1),
+      supabase.from('categories').select('id').limit(1),
+    ]);
+    const missing: ('works' | 'categories')[] = [];
+    if (worksRes.error?.message?.includes('schema cache') || worksRes.error?.code === 'PGRST205') missing.push('works');
+    if (catsRes.error?.message?.includes('schema cache') || catsRes.error?.code === 'PGRST205') missing.push('categories');
+    setMissingTables(missing);
+    setDbStatus(missing.length === 0 ? 'ok' : 'missing');
+  }
+
+  useEffect(() => {
+    if (session) checkDB();
+  }, [session]);
+
+  const isLoading = session === null || (session === true && dbStatus === 'checking');
+  if (isLoading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0a0a0a', color: '#6272a4', fontSize: 13 }}>
+      확인 중...
+    </div>
+  );
   if (!session) return <LoginView onLogin={() => setSession(true)} />;
+  if (dbStatus === 'missing') return <SetupScreen missing={missingTables} onRetry={checkDB} />;
   return <Dashboard onLogout={() => setSession(false)} />;
 }

@@ -141,9 +141,9 @@ export function WorksSection() {
     Promise.all([
       supabase.from('works').select('*').order('sort_order', { ascending: true }),
       supabase.from('categories').select('*').order('sort_order', { ascending: true }),
-    ]).then(([{ data: works }, { data: cats }]) => {
-      if (works) setAllRecords(works);
-      if (cats) setCategoryOrder(cats);
+    ]).then(([{ data: works, error: wErr }, { data: cats, error: cErr }]) => {
+      if (!wErr && works) setAllRecords(works);
+      if (!cErr && cats) setCategoryOrder(cats);
       setLoading(false);
     });
   }, []);

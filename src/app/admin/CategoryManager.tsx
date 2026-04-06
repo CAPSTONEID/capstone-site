@@ -37,10 +37,15 @@ export function CategoryManager() {
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
-    const [{ data: cats }, { data: works }] = await Promise.all([
+    const [{ data: cats, error: catErr }, { data: works }] = await Promise.all([
       supabase.from('categories').select('*').order('sort_order', { ascending: true }),
       supabase.from('works').select('main_category'),
     ]);
+
+    if (catErr) {
+      setLoading(false);
+      return;
+    }
 
     const countMap: Record<string, number> = {};
     (works ?? []).forEach(w => {
