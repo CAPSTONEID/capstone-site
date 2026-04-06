@@ -19,6 +19,8 @@ export interface WorkRecord {
   url_is_locked: boolean;
   description_1: string | null;
   description_2: string | null;
+  main_category: string;
+  is_featured: boolean;
   created_at: string;
   updated_at: string;
 }

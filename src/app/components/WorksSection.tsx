@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase, type WorkRecord } from '../../lib/supabase';
 import { generateLines, type WorkCodeLine } from '../../lib/worksHelpers';
 
@@ -9,9 +9,10 @@ interface WorkItem {
   filename: string;
   status: 'LIVE' | 'STOP';
   href?: string;
+  is_featured: boolean;
 }
 
-function CodeCard({ lines, filename, status, href }: WorkItem) {
+function CodeCard({ lines, filename, status, href, is_featured }: WorkItem) {
   const [open, setOpen] = useState(false);
   const isLive = status === 'LIVE';
 
@@ -28,6 +29,9 @@ function CodeCard({ lines, filename, status, href }: WorkItem) {
           <span style={{ background: '#50fa7b' }} />
         </div>
         <span className="works-code-filename">{filename}</span>
+        {is_featured && (
+          <span style={{ fontSize: '12px', marginLeft: '4px', lineHeight: 1 }} title="추천 작업물">★</span>
+        )}
         <span
           className="works-code-badge"
           style={isLive
@@ -97,28 +101,39 @@ function CodeCard({ lines, filename, status, href }: WorkItem) {
   );
 }
 
+/* ─── 탭 스타일 헬퍼 ─── */
+
+const CATEGORY_COLORS = ['#8be9fd', '#ffb86c', '#ff79c6', '#50fa7b', '#f1fa8c', '#bd93f9'];
+
+function getCategoryColor(tab: string, index: number): { border: string; bg: string; color: string; dot: string } {
+  if (tab === '추천') return {
+    border: 'rgba(255,215,0,0.4)', bg: 'rgba(255,215,0,0.12)', color: '#ffd700', dot: '#ffd700',
+  };
+  if (tab === '전체') return {
+    border: 'rgba(189,147,249,0.4)', bg: 'rgba(189,147,249,0.15)', color: '#bd93f9', dot: '#bd93f9',
+  };
+  if (tab === '미분류') return {
+    border: 'rgba(98,114,164,0.4)', bg: 'rgba(98,114,164,0.15)', color: '#a0aec0', dot: '#a0aec0',
+  };
+  const c = CATEGORY_COLORS[index % CATEGORY_COLORS.length];
+  return { border: `${c}66`, bg: `${c}1a`, color: c, dot: c };
+}
+
 /* ─── WorksSection ─── */
-
-type TabType = 'ALL' | 'LIVE' | 'STOP';
-
-const TAB_CONFIG: Record<TabType, { borderActive: string; bgActive: string; colorActive: string; dot: string }> = {
-  ALL:  { borderActive: 'rgba(189,147,249,0.4)', bgActive: 'rgba(189,147,249,0.15)', colorActive: '#bd93f9', dot: '#bd93f9' },
-  LIVE: { borderActive: 'rgba(80,250,123,0.4)',  bgActive: 'rgba(191,255,60,0.12)',  colorActive: '#50fa7b', dot: '#50fa7b' },
-  STOP: { borderActive: 'rgba(255,85,85,0.4)',   bgActive: 'rgba(255,85,85,0.12)',   colorActive: '#ff5555', dot: '#ff5555' },
-};
 
 function recordToWorkItem(record: WorkRecord): WorkItem {
   return {
     filename: record.filename,
     status: record.status,
     href: record.href ?? undefined,
+    is_featured: record.is_featured,
     lines: generateLines(record),
   };
 }
 
 export function WorksSection() {
-  const [activeTab, setActiveTab] = useState<TabType>('LIVE');
-  const [allWorks, setAllWorks] = useState<WorkItem[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('추천');
+  const [allRecords, setAllRecords] = useState<WorkRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -127,27 +142,50 @@ export function WorksSection() {
       .select('*')
       .order('sort_order', { ascending: true })
       .then(({ data }) => {
-        if (data) {
-          setAllWorks(data.map(recordToWorkItem));
-        }
+        if (data) setAllRecords(data);
         setLoading(false);
       });
   }, []);
 
-  const liveCount = allWorks.filter(w => w.status === 'LIVE').length;
-  const stopCount = allWorks.filter(w => w.status === 'STOP').length;
+  /* 동적 카테고리 탭 목록 */
+  const dynamicCategories = useMemo(() => {
+    const cats = [...new Set(allRecords.map(r => r.main_category ?? '미분류'))];
+    return cats.sort((a, b) => {
+      if (a === '미분류') return -1;
+      if (b === '미분류') return 1;
+      return a.localeCompare(b, 'ko');
+    });
+  }, [allRecords]);
 
-  const counts: Record<TabType, number> = {
-    ALL:  allWorks.length,
-    LIVE: liveCount,
-    STOP: stopCount,
-  };
+  const tabs = useMemo(() => ['추천', '전체', ...dynamicCategories], [dynamicCategories]);
 
-  const filtered = activeTab === 'ALL'
-    ? allWorks
-    : allWorks.filter(w => w.status === activeTab);
+  /* 탭 카운트 */
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {
+      '추천': allRecords.filter(r => r.is_featured).length,
+      '전체': allRecords.length,
+    };
+    dynamicCategories.forEach(cat => {
+      map[cat] = allRecords.filter(r => (r.main_category ?? '미분류') === cat).length;
+    });
+    return map;
+  }, [allRecords, dynamicCategories]);
 
-  const tabs: TabType[] = ['ALL', 'LIVE', 'STOP'];
+  /* 필터링 */
+  const filtered = useMemo(() => {
+    let records: WorkRecord[];
+    if (activeTab === '추천') records = allRecords.filter(r => r.is_featured);
+    else if (activeTab === '전체') records = allRecords;
+    else records = allRecords.filter(r => (r.main_category ?? '미분류') === activeTab);
+    return records.map(recordToWorkItem);
+  }, [activeTab, allRecords]);
+
+  /* 탭 클릭 시 존재하지 않는 탭이면 초기화 */
+  useEffect(() => {
+    if (tabs.length > 0 && !tabs.includes(activeTab)) {
+      setActiveTab('추천');
+    }
+  }, [tabs, activeTab]);
 
   return (
     <section id="works" className="capstone-section reveal">
@@ -155,9 +193,12 @@ export function WorksSection() {
 
       {/* 탭 필터 */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '28px', flexWrap: 'wrap' }}>
-        {tabs.map(tab => {
+        {tabs.map((tab, i) => {
           const isActive = activeTab === tab;
-          const cfg = TAB_CONFIG[tab];
+          /* special tabs는 고정 인덱스, 동적은 special 이후 인덱스 */
+          const colorIdx = tab === '추천' ? 0 : tab === '전체' ? 1 : tab === '미분류' ? 2 : i;
+          const cfg = getCategoryColor(tab, colorIdx);
+
           return (
             <button
               key={tab}
@@ -168,9 +209,9 @@ export function WorksSection() {
                 gap: '7px',
                 padding: '6px 14px',
                 borderRadius: '6px',
-                border: isActive ? `1px solid ${cfg.borderActive}` : '1px solid rgba(98,114,164,0.3)',
-                background: isActive ? cfg.bgActive : 'rgba(40,42,54,0.6)',
-                color: isActive ? cfg.colorActive : '#6272a4',
+                border: isActive ? `1px solid ${cfg.border}` : '1px solid rgba(98,114,164,0.3)',
+                background: isActive ? cfg.bg : 'rgba(40,42,54,0.6)',
+                color: isActive ? cfg.color : '#6272a4',
                 fontSize: '11px',
                 letterSpacing: '0.1em',
                 cursor: 'pointer',
@@ -179,24 +220,25 @@ export function WorksSection() {
                 outline: 'none',
               }}
             >
-              <span style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: isActive ? cfg.dot : '#6272a4',
-                display: 'inline-block',
-                flexShrink: 0,
-              }} />
+              {tab === '추천' ? (
+                <span style={{ fontSize: '10px', lineHeight: 1 }}>★</span>
+              ) : (
+                <span style={{
+                  width: '6px', height: '6px', borderRadius: '50%',
+                  background: isActive ? cfg.dot : '#6272a4',
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+              )}
               {tab}
               <span style={{
                 background: isActive ? 'rgba(255,255,255,0.1)' : 'rgba(98,114,164,0.15)',
-                color: isActive ? cfg.colorActive : '#6272a4',
+                color: isActive ? cfg.color : '#6272a4',
                 borderRadius: '4px',
                 padding: '1px 6px',
                 fontSize: '10px',
                 lineHeight: '1.4',
               }}>
-                {counts[tab]}
+                {counts[tab] ?? 0}
               </span>
             </button>
           );
@@ -207,6 +249,10 @@ export function WorksSection() {
       {loading ? (
         <div style={{ color: '#6272a4', fontSize: 13, padding: '40px 0', textAlign: 'center' }}>
           작업물 불러오는 중...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ color: '#6272a4', fontSize: 13, padding: '40px 0', textAlign: 'center' }}>
+          {activeTab === '추천' ? '추천 작업물이 없습니다. 어드민에서 ★ 설정해주세요.' : '해당 카테고리에 작업물이 없습니다.'}
         </div>
       ) : (
         <div className="works-grid">
