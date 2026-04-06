@@ -100,7 +100,7 @@ CREATE POLICY "public read categories" ON public.categories
 
 DROP POLICY IF EXISTS "auth manage categories" ON public.categories;
 CREATE POLICY "auth manage categories" ON public.categories
-  FOR ALL USING (auth.role() = 'authenticated');
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- 기본 카테고리 데이터 ('미분류'는 항상 맨 처음)
 INSERT INTO public.categories (name, sort_order) VALUES

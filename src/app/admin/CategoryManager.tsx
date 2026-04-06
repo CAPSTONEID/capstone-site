@@ -66,8 +66,12 @@ export function CategoryManager({ onCategoryChange }: { onCategoryChange?: () =>
     if (!name) return;
     if (categories.some(c => c.name === name)) { flash('이미 존재하는 카테고리입니다.', 'err'); return; }
     const nextOrder = categories.length > 0 ? Math.max(...categories.map(c => c.sort_order)) + 1 : 0;
-    const { error } = await supabase.from('categories').insert({ name, sort_order: nextOrder });
+    const { data, error } = await supabase
+      .from('categories')
+      .insert({ name, sort_order: nextOrder })
+      .select();
     if (error) { flash('추가 실패: ' + error.message, 'err'); return; }
+    if (!data || data.length === 0) { flash('추가 실패: 저장되지 않았습니다. RLS 정책을 확인해주세요.', 'err'); return; }
     setNewName('');
     flash(`"${name}" 카테고리 추가 완료 ✓`);
     fetchCategories();
@@ -76,27 +80,37 @@ export function CategoryManager({ onCategoryChange }: { onCategoryChange?: () =>
 
   /* ── 수정 (이름 변경) ── */
   async function handleRename(cat: CategoryWithCount) {
-    const newNameTrimmed = editingName.trim();
-    if (!newNameTrimmed || newNameTrimmed === cat.name) { setEditingId(null); return; }
-    if (categories.some(c => c.name === newNameTrimmed && c.id !== cat.id)) {
+    const trimmed = editingName.trim();
+    if (!trimmed || trimmed === cat.name) { setEditingId(null); return; }
+    if (categories.some(c => c.name === trimmed && c.id !== cat.id)) {
       flash('이미 존재하는 카테고리 이름입니다.', 'err');
       return;
     }
-    // categories 테이블 업데이트
-    const { error: catErr } = await supabase
+
+    const { data, error } = await supabase
       .from('categories')
-      .update({ name: newNameTrimmed, updated_at: new Date().toISOString() })
-      .eq('id', cat.id);
-    if (catErr) { flash('수정 실패: ' + catErr.message, 'err'); return; }
-    // 해당 카테고리를 사용 중인 works도 업데이트
+      .update({ name: trimmed })
+      .eq('id', cat.id)
+      .select();
+
+    if (error) {
+      flash('저장 실패: ' + error.message, 'err');
+      return;
+    }
+    if (!data || data.length === 0) {
+      flash('저장 실패: 반영되지 않았습니다. 아래 SQL을 Supabase에서 실행해주세요.\n\nDROP POLICY IF EXISTS "auth manage categories" ON public.categories;\nCREATE POLICY "auth manage categories" ON public.categories FOR ALL TO authenticated USING (true) WITH CHECK (true);', 'err');
+      return;
+    }
+
     if (cat.work_count > 0) {
       await supabase
         .from('works')
-        .update({ main_category: newNameTrimmed, updated_at: new Date().toISOString() })
+        .update({ main_category: trimmed })
         .eq('main_category', cat.name);
     }
+
     setEditingId(null);
-    flash(`"${cat.name}" → "${newNameTrimmed}" 변경 완료 ✓`);
+    flash(`"${cat.name}" → "${trimmed}" 변경 완료 ✓`);
     fetchCategories();
     onCategoryChange?.();
   }
@@ -111,10 +125,11 @@ export function CategoryManager({ onCategoryChange }: { onCategoryChange?: () =>
     if (cat.work_count > 0) {
       await supabase
         .from('works')
-        .update({ main_category: '미분류', updated_at: new Date().toISOString() })
+        .update({ main_category: '미분류' })
         .eq('main_category', cat.name);
     }
-    await supabase.from('categories').delete().eq('id', cat.id);
+    const { error } = await supabase.from('categories').delete().eq('id', cat.id);
+    if (error) { flash('삭제 실패: ' + error.message, 'err'); return; }
     flash(`"${cat.name}" 삭제 완료`);
     fetchCategories();
     onCategoryChange?.();

@@ -626,10 +626,13 @@ CREATE TRIGGER set_categories_updated_at
 
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "public read categories" ON public.categories;
 CREATE POLICY "public read categories" ON public.categories
   FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "auth manage categories" ON public.categories;
 CREATE POLICY "auth manage categories" ON public.categories
-  FOR ALL USING (auth.role() = 'authenticated');
+  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 INSERT INTO public.categories (name, sort_order)
   VALUES ('미분류', 0)
