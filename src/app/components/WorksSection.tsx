@@ -1,322 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase, type WorkRecord } from '../../lib/supabase';
+import { generateLines, type WorkCodeLine } from '../../lib/worksHelpers';
 
-type Token = { color: string; text: string };
-
-const kw  = (t: string): Token => ({ color: '#ff79c6', text: t });
-const str = (t: string): Token => ({ color: '#d4ff47', text: t });
-const fn  = (t: string): Token => ({ color: '#bfff3c', text: t });
-const pr  = (t: string): Token => ({ color: '#8be9fd', text: t });
-const cm  = (t: string): Token => ({ color: '#6272a4', text: t });
-const nm  = (t: string): Token => ({ color: '#bd93f9', text: t });
-const tx  = (t: string): Token => ({ color: '#f8f8f2', text: t });
-const red = (t: string): Token => ({ color: '#ff5555', text: t });
-
-interface WorkCodeLine { n: number; tokens: Token[] }
-
-type WorkStatus = 'LIVE' | 'STOP';
+/* ─── CodeCard 컴포넌트 ─── */
 
 interface WorkItem {
   lines: WorkCodeLine[];
   filename: string;
-  status: WorkStatus;
+  status: 'LIVE' | 'STOP';
   href?: string;
 }
-
-/* ─── 작업물 데이터 ─── */
-
-const notionLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 실무자가 제작한 노션 템플릿')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_01'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Notion Template"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Productivity · System"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"notion.com/ko/@capstone"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 실무에서 직접 쓰는 구조를')] },
-  { n: 12, tokens: [cm('// 템플릿으로 공개합니다.')] },
-];
-
-const promptLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 인물 전용 프롬프트 생성기')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_02'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Prompt Generator"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · AI"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinhumanprompt.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// AI 기반 인물 분석 및')] },
-  { n: 12, tokens: [cm('// 프롬프트 자동 생성 도구')] },
-];
-
-const handParticlesLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 카메라 손 파티클 인터랙션')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_03'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Interactive Experience"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Particles"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinhandparticles.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 손 동작을 카메라로 인식해')] },
-  { n: 12, tokens: [cm('// 파티클을 생성하는 인터랙션')] },
-];
-
-const mouseParticlesLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 마우스 파티클 인터랙션')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_04'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Interactive Experience"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Particles"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sindpparticles.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 마우스 움직임에 반응하는')] },
-  { n: 12, tokens: [cm('// 파티클 인터랙티브 아트')] },
-];
-
-const shredImgLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 이미지 분쇄기')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_05'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Image Shredder"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinshredimg.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 이미지를 픽셀 단위로 분쇄해')] },
-  { n: 12, tokens: [cm('// 산산조각 내는 인터랙티브 툴')] },
-];
-
-const consultingLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 고객 상담 전체 프로세스 앱 설계')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_06'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"App Design · UX"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Process · Consulting"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), red('"🔒 보안페이지"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 고객 상담 전 과정을 설계한')] },
-  { n: 12, tokens: [cm('// 앱 기획 및 프로세스 문서')] },
-];
-
-const mbtiFormLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// MBTI 별 상담폼')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_07'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Consulting Form · UX"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · MBTI"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinmbtiform.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// MBTI 유형별 맞춤 상담폼을')] },
-  { n: 12, tokens: [cm('// 자동으로 생성하는 인터랙션')] },
-];
-
-const neumoLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 뉴모피즘 UI 디자인')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_08'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"UI Design · Neumorphism"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Design"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinuidesign.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 부드러운 입체감의 뉴모피즘')] },
-  { n: 12, tokens: [cm('// 스타일로 구현한 UI 디자인')] },
-];
-
-const clockLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 아날로그 시계의 디지털 표현')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_09'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Interactive Clock"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Design"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sindiglogclock.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 아날로그 감성을 디지털로')] },
-  { n: 12, tokens: [cm('// 재해석한 인터랙티브 시계')] },
-];
-
-const faceEmotionLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 얼굴표정 분석기')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_11'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Face Emotion Analyzer"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · AI Vision"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinfaceemotion.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 카메라로 얼굴 표정을 실시간')] },
-  { n: 12, tokens: [cm('// 감지·분석하는 AI 인터랙션')] },
-];
-
-const windParticlesLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 바람 그리고 파티클')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_12'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Interactive Experience"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Particles"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinwindwind.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 바람의 흐름을 파티클로')] },
-  { n: 12, tokens: [cm('// 시각화한 인터랙티브 아트')] },
-];
-
-const shoppingMovieLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 쇼핑, 영화 조회기')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_10'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Shopping · Movie Viewer"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · App"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), red('"STOP ✗"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinda2so.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 쇼핑 검색과 영화 정보를')] },
-  { n: 12, tokens: [cm('// 한 곳에서 조회하는 앱')] },
-];
-
-const discordAnsiLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 디스코드 ANSI 코드 꾸미기')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_13'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Discord ANSI Styler"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sindisansi.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 디스코드 채팅에서 ANSI 코드로')] },
-  { n: 12, tokens: [cm('// 텍스트를 꾸미는 스타일링 툴')] },
-];
-
-const textUniTransLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 영문텍스트 특수문자로 변경')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_14'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Text Unicode Translator"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"textunitrans.site"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 영문 텍스트를 유니코드 특수문자로')] },
-  { n: 12, tokens: [cm('// 변환해주는 스타일링 툴')] },
-];
-
-const vibeFormLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 구글시트와 연결된 입력폼')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_15'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Google Sheets Form"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"sinvibeform.io"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 구글시트와 실시간으로 연동되는')] },
-  { n: 12, tokens: [cm('// 데이터 입력폼 사이트')] },
-];
-
-const mp4ToGifLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// MP4를 GIF로 변환하는 툴')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_16'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"MP4 to GIF Converter"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"capstoneid.sinconvertmp4togif"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// MP4 동영상을 GIF 파일로')] },
-  { n: 12, tokens: [cm('// 간편하게 변환하는 컨버터')] },
-];
-
-const convertImageLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// 이미지 컨버트 사이트')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_17'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"Image Converter"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"capstoneid.id/convertimage/"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// 다양한 이미지 포맷을')] },
-  { n: 12, tokens: [cm('// 간편하게 변환하는 컨버터')] },
-];
-
-const qrTreeLines: WorkCodeLine[] = [
-  { n:  1, tokens: [cm('// QR 트리제작기')] },
-  { n:  2, tokens: [] },
-  { n:  3, tokens: [kw('const'), tx(' '), nm('work_18'), tx(' = {')] },
-  { n:  4, tokens: [tx('  '), pr('type'), tx(': '), str('"QR Tree Generator"'), tx(',')] },
-  { n:  5, tokens: [tx('  '), pr('creator'), tx(': '), str('"CAPSTONE"'), tx(',')] },
-  { n:  6, tokens: [tx('  '), pr('category'), tx(': '), str('"Vibe Coding · Tool"'), tx(',')] },
-  { n:  7, tokens: [tx('  '), pr('status'), tx(': '), fn('"LIVE ✓"'), tx(',')] },
-  { n:  8, tokens: [tx('  '), pr('url'), tx(': '), str('"capstoneid.id/sinsqrtree/"'), tx(',')] },
-  { n:  9, tokens: [tx('};')] },
-  { n: 10, tokens: [] },
-  { n: 11, tokens: [cm('// QR코드를 트리 형태로')] },
-  { n: 12, tokens: [cm('// 시각화하는 제작 도구')] },
-];
-
-
-const ALL_WORKS: WorkItem[] = [
-  { lines: notionLines,         filename: 'notion_template.js',       status: 'LIVE', href: 'https://www.notion.com/ko/@capstone' },
-  { lines: promptLines,         filename: 'prompt_generator_2.0.js',      status: 'LIVE', href: 'https://sinhumanprompt.figma.site' },
-  { lines: handParticlesLines,  filename: 'camera_hand_particles.js', status: 'LIVE', href: 'https://sinhandparticles.figma.site/' },
-  { lines: mouseParticlesLines, filename: 'mouse_particles.js',       status: 'LIVE', href: 'https://sindpparticles.figma.site/' },
-  { lines: shredImgLines,       filename: 'image_shredder.js',        status: 'LIVE', href: 'https://sinshredimg.figma.site/' },
-  { lines: consultingLines,     filename: 'consulting_process.js',    status: 'LIVE', href: 'https://capstone-id-info.notion.site/31dfcc99237780b4ae8bc1c5cec1f82b?source=copy_link' },
-  { lines: mbtiFormLines,       filename: 'mbti_form.js',             status: 'LIVE', href: 'https://sinmbtiform.figma.site' },
-  { lines: neumoLines,          filename: 'neumorphism_ui.js',        status: 'LIVE', href: 'https://sinuidesign.figma.site/' },
-  { lines: clockLines,          filename: 'diglog_clock.js',          status: 'LIVE', href: 'https://sindiglogclock.figma.site/' },
-  { lines: faceEmotionLines,    filename: 'face_emotion.js',          status: 'LIVE', href: 'https://sinfaceemotion.figma.site' },
-  { lines: windParticlesLines,  filename: 'wind_particles.js',        status: 'LIVE', href: 'https://sinwindwind.figma.site/' },
-  { lines: discordAnsiLines,    filename: 'discord_ansi.js',          status: 'LIVE', href: 'https://sindisansi.figma.site/' },
-  { lines: textUniTransLines,   filename: 'text_uni_trans.js',        status: 'LIVE', href: 'https://textunitrans.figma.site/' },
-  { lines: vibeFormLines,       filename: 'vibe_form.js',             status: 'LIVE', href: 'https://capstoneid.github.io/sinvibeform/' },
-  { lines: shoppingMovieLines,  filename: 'shopping_movie.js',        status: 'STOP', href: 'https://claude.ai/public/artifacts/664680e9-56d7-44d2-a129-833870db72db' },
-  { lines: mp4ToGifLines,       filename: 'mp4_to_gif_converter.js',  status: 'LIVE', href: 'https://capstoneid.github.io/sinconvertmp4togif/' },
-  { lines: convertImageLines,   filename: 'image_convert.js',         status: 'LIVE', href: 'https://capstoneid.github.io/convertimage/' },
-  { lines: qrTreeLines,         filename: 'qr_tree_generator.js',      status: 'LIVE', href: 'https://capstoneid.github.io/sinsqrtree/' },
-];
-
-/* ─── CodeCard 컴포넌트 ─── */
 
 function CodeCard({ lines, filename, status, href }: WorkItem) {
   const [open, setOpen] = useState(false);
@@ -414,21 +107,45 @@ const TAB_CONFIG: Record<TabType, { borderActive: string; bgActive: string; colo
   STOP: { borderActive: 'rgba(255,85,85,0.4)',   bgActive: 'rgba(255,85,85,0.12)',   colorActive: '#ff5555', dot: '#ff5555' },
 };
 
+function recordToWorkItem(record: WorkRecord): WorkItem {
+  return {
+    filename: record.filename,
+    status: record.status,
+    href: record.href ?? undefined,
+    lines: generateLines(record),
+  };
+}
+
 export function WorksSection() {
   const [activeTab, setActiveTab] = useState<TabType>('LIVE');
+  const [allWorks, setAllWorks] = useState<WorkItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const liveCount = ALL_WORKS.filter(w => w.status === 'LIVE').length;
-  const stopCount = ALL_WORKS.filter(w => w.status === 'STOP').length;
+  useEffect(() => {
+    supabase
+      .from('works')
+      .select('*')
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => {
+        if (data) {
+          setAllWorks(data.map(recordToWorkItem));
+        }
+        setLoading(false);
+      });
+  }, []);
+
+  const liveCount = allWorks.filter(w => w.status === 'LIVE').length;
+  const stopCount = allWorks.filter(w => w.status === 'STOP').length;
 
   const counts: Record<TabType, number> = {
-    ALL:  ALL_WORKS.length,
+    ALL:  allWorks.length,
     LIVE: liveCount,
     STOP: stopCount,
   };
 
   const filtered = activeTab === 'ALL'
-    ? ALL_WORKS
-    : ALL_WORKS.filter(w => w.status === activeTab);
+    ? allWorks
+    : allWorks.filter(w => w.status === activeTab);
 
   const tabs: TabType[] = ['ALL', 'LIVE', 'STOP'];
 
@@ -487,11 +204,17 @@ export function WorksSection() {
       </div>
 
       {/* 카드 그리드 */}
-      <div className="works-grid">
-        {filtered.map(work => (
-          <CodeCard key={work.filename} {...work} />
-        ))}
-      </div>
+      {loading ? (
+        <div style={{ color: '#6272a4', fontSize: 13, padding: '40px 0', textAlign: 'center' }}>
+          작업물 불러오는 중...
+        </div>
+      ) : (
+        <div className="works-grid">
+          {filtered.map(work => (
+            <CodeCard key={work.filename} {...work} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
