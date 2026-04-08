@@ -57,38 +57,47 @@ export function HeroCodeBlock() {
   const rafRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 드래그 상태
+  const [animDone, setAnimDone] = useState(false); // fadeUp 애니메이션 완료 여부
+  const offsetRef = useRef({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
+  const draggingRef = useRef(false);
   const dragStart = useRef({ x: 0, y: 0, ox: 0, oy: 0 });
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y };
+    if (!animDone) return;
+    draggingRef.current = true;
+    dragStart.current = { x: e.clientX, y: e.clientY, ox: offsetRef.current.x, oy: offsetRef.current.y };
     e.preventDefault();
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (!animDone) return;
     const touch = e.touches[0];
-    setDragging(true);
-    dragStart.current = { x: touch.clientX, y: touch.clientY, ox: offset.x, oy: offset.y };
+    draggingRef.current = true;
+    dragStart.current = { x: touch.clientX, y: touch.clientY, ox: offsetRef.current.x, oy: offsetRef.current.y };
   };
 
   useEffect(() => {
-    if (!dragging) return;
     const handleMouseMove = (e: MouseEvent) => {
-      setOffset({
+      if (!draggingRef.current) return;
+      const next = {
         x: dragStart.current.ox + e.clientX - dragStart.current.x,
         y: dragStart.current.oy + e.clientY - dragStart.current.y,
-      });
+      };
+      offsetRef.current = next;
+      setOffset({ ...next });
     };
     const handleTouchMove = (e: TouchEvent) => {
+      if (!draggingRef.current) return;
       const touch = e.touches[0];
-      setOffset({
+      const next = {
         x: dragStart.current.ox + touch.clientX - dragStart.current.x,
         y: dragStart.current.oy + touch.clientY - dragStart.current.y,
-      });
+      };
+      offsetRef.current = next;
+      setOffset({ ...next });
     };
-    const handleUp = () => setDragging(false);
+    const handleUp = () => { draggingRef.current = false; };
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleUp);
     document.addEventListener('touchmove', handleTouchMove, { passive: true });
@@ -99,7 +108,7 @@ export function HeroCodeBlock() {
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleUp);
     };
-  }, [dragging]);
+  }, []);
 
   useEffect(() => {
     function tick() {
@@ -147,15 +156,18 @@ export function HeroCodeBlock() {
       className="hero-code-editor"
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
+      onAnimationEnd={(e) => {
+        if (e.animationName === 'fadeUp') setAnimDone(true);
+      }}
       style={{
-        transform: `translate(${offset.x}px, ${offset.y}px)`,
-        cursor: dragging ? 'grabbing' : 'grab',
+        animation: animDone ? 'none' : undefined,
+        transform: animDone ? `translate(${offset.x}px, ${offset.y}px)` : undefined,
+        cursor: animDone ? (draggingRef.current ? 'grabbing' : 'grab') : 'default',
         userSelect: 'none',
         touchAction: 'none',
         position: 'relative',
-        zIndex: dragging ? 100 : 1,
-        transition: dragging ? 'none' : 'box-shadow 0.2s',
-        boxShadow: dragging ? '0 8px 32px rgba(0,0,0,0.45)' : undefined,
+        zIndex: draggingRef.current ? 100 : 1,
+        boxShadow: draggingRef.current ? '0 8px 32px rgba(0,0,0,0.45)' : undefined,
       }}
     >
       {/* Header bar */}
