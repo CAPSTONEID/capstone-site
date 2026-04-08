@@ -1256,7 +1256,7 @@
     margin-top: 32px;
   }
   .hero-code-editor {
-    width: 100%;
+    display: none;
   }
   .capstone-section {
     padding: 80px 24px;
