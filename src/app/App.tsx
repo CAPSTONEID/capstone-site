@@ -350,7 +350,7 @@ export default function App() {
       
 
       {/* Floating works button */}
-      <a className="contact-fab" href="#works" aria-label="실무자의 바이브코딩" style={{ bottom: '88px', background: '#BFFF3C', color: '#0A0A0A' }}>
+      <a className="contact-fab" href="#works" onClick={(e) => { e.preventDefault(); document.getElementById('works')?.scrollIntoView({ behavior: 'smooth' }); }} aria-label="실무자의 바이브코딩" style={{ bottom: '88px', background: '#BFFF3C', color: '#0A0A0A' }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
         </svg>
