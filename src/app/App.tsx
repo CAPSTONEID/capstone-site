@@ -37,11 +37,11 @@ export default function App() {
         </div>
         <nav>
           <ul className="capstone-nav">
-            <li><a href="#about">소개</a></li>
-            <li><a href="#work">작업</a></li>
-            <li><a href="#tools">도구</a></li>
-            <li><a href="#channels">채널</a></li>
-            <li><a href="#works">포폴</a></li>
+            <li><a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>소개</a></li>
+            <li><a href="#work" onClick={(e) => { e.preventDefault(); document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' }); }}>작업</a></li>
+            <li><a href="#tools" onClick={(e) => { e.preventDefault(); document.getElementById('tools')?.scrollIntoView({ behavior: 'smooth' }); }}>도구</a></li>
+            <li><a href="#channels" onClick={(e) => { e.preventDefault(); document.getElementById('channels')?.scrollIntoView({ behavior: 'smooth' }); }}>채널</a></li>
+            <li><a href="#works" onClick={(e) => { e.preventDefault(); document.getElementById('works')?.scrollIntoView({ behavior: 'smooth' }); }}>포폴</a></li>
             <li>
               <button className="contact-nav-btn" onClick={() => setContactOpen(true)}>연락</button>
             </li>
