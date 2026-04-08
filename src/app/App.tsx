@@ -104,6 +104,12 @@ export default function App() {
               바이브코딩 및 콘텐츠 프로세스 구축부터<br />
               반복되는 업무를 구조화해 더 빠르고 정확하게 실행합니다.
             </h3>
+            <button
+              className="capstone-btn btn-primary hero-channel-btn"
+              onClick={() => document.getElementById('channels')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              운영채널 보기 →
+            </button>
           </div>
           <HeroCodeBlock />
         </div>
