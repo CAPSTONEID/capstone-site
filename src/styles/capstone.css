@@ -418,6 +418,7 @@
   animation: fadeUp 1s 1s both;
   border: none;
   cursor: pointer;
+  align-self: flex-start;
 }
 
 .capstone-btn {
