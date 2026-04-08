@@ -56,6 +56,51 @@ export function HeroCodeBlock() {
   const phaseRef = useRef<'typing' | 'pausing' | 'resetting'>('typing');
   const rafRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // 드래그 상태
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, ox: 0, oy: 0 });
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDragging(true);
+    dragStart.current = { x: e.clientX, y: e.clientY, ox: offset.x, oy: offset.y };
+    e.preventDefault();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setDragging(true);
+    dragStart.current = { x: touch.clientX, y: touch.clientY, ox: offset.x, oy: offset.y };
+  };
+
+  useEffect(() => {
+    if (!dragging) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      setOffset({
+        x: dragStart.current.ox + e.clientX - dragStart.current.x,
+        y: dragStart.current.oy + e.clientY - dragStart.current.y,
+      });
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      setOffset({
+        x: dragStart.current.ox + touch.clientX - dragStart.current.x,
+        y: dragStart.current.oy + touch.clientY - dragStart.current.y,
+      });
+    };
+    const handleUp = () => setDragging(false);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleUp);
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleUp);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleUp);
+    };
+  }, [dragging]);
+
   useEffect(() => {
     function tick() {
       if (phaseRef.current === 'typing') {
@@ -98,7 +143,21 @@ export function HeroCodeBlock() {
   const isTyping = phaseRef.current === 'typing';
 
   return (
-    <div className="hero-code-editor">
+    <div
+      className="hero-code-editor"
+      onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
+      style={{
+        transform: `translate(${offset.x}px, ${offset.y}px)`,
+        cursor: dragging ? 'grabbing' : 'grab',
+        userSelect: 'none',
+        touchAction: 'none',
+        position: 'relative',
+        zIndex: dragging ? 100 : 1,
+        transition: dragging ? 'none' : 'box-shadow 0.2s',
+        boxShadow: dragging ? '0 8px 32px rgba(0,0,0,0.45)' : undefined,
+      }}
+    >
       {/* Header bar */}
       <div className="hero-code-header">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ color: '#6272a4' }}>
