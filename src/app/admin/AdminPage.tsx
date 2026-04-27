@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { supabase, type WorkRecord, type WorkInsert } from '../../lib/supabase';
 import { generateLines } from '../../lib/worksHelpers';
 import { CategoryManager } from './CategoryManager';
+import { SiteSettingsManager } from './SiteSettingsManager';
 
 /* ── 색상 팔레트 ── */
 const C = {
@@ -333,7 +334,7 @@ function WorkForm({
 
 /* ─── 대시보드 ─── */
 function Dashboard({ onLogout }: { onLogout: () => void }) {
-  const [activeView, setActiveView] = useState<'works' | 'categories'>('works');
+  const [activeView, setActiveView] = useState<'works' | 'categories' | 'settings'>('works');
   const [works, setWorks] = useState<WorkRecord[]>([]);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -430,8 +431,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
           <span style={{ fontSize: 11, color: C.textMuted, letterSpacing: '0.15em', marginRight: 20 }}>CAPSTONE · ADMIN</span>
           {/* 뷰 전환 탭 */}
-          {(['works', 'categories'] as const).map(view => {
-            const label = view === 'works' ? '작업물 관리' : '카테고리 관리';
+          {(['works', 'categories', 'settings'] as const).map(view => {
+            const label = view === 'works' ? '작업물 관리' : view === 'categories' ? '카테고리 관리' : '사이트 설정';
             const isActive = activeView === view;
             return (
               <button
@@ -474,6 +475,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
       {/* 카테고리 관리 뷰 */}
       {activeView === 'categories' && <CategoryManager onCategoryChange={fetchAll} />}
+
+      {/* 사이트 설정 뷰 */}
+      {activeView === 'settings' && <SiteSettingsManager />}
 
       {/* 작업물 관리 뷰 */}
       {activeView === 'works' && <div style={{ padding: '24px 32px' }}>

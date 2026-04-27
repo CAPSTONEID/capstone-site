@@ -34,3 +34,15 @@ export interface CategoryRecord {
   created_at: string;
   updated_at: string;
 }
+
+export interface SiteSettings {
+  id: string;
+  favicon_url: string | null;
+  og_image_url: string | null;
+  site_title: string | null;
+  site_description: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SiteSettingsUpdate = Omit<SiteSettings, 'id' | 'created_at' | 'updated_at'>;

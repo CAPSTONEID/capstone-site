@@ -2,6 +2,50 @@ import { useEffect, useState } from 'react';
 import '../styles/capstone.css';
 import { HeroCodeBlock } from './components/HeroCodeBlock';
 import { WorksSection } from './components/WorksSection';
+import { supabase } from '../lib/supabase';
+
+function applyMeta(tag: string, attr: string, key: string, content: string) {
+  let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute(tag === 'property' ? 'content' : 'content', content);
+}
+
+async function loadAndApplySiteSettings() {
+  const { data } = await supabase.from('site_settings').select('*').limit(1).maybeSingle();
+  if (!data) return;
+
+  if (data.site_title) {
+    document.title = data.site_title;
+    applyMeta('property', 'property', 'og:title', data.site_title);
+    applyMeta('name', 'name', 'twitter:title', data.site_title);
+  }
+
+  if (data.site_description) {
+    applyMeta('name', 'name', 'description', data.site_description);
+    applyMeta('property', 'property', 'og:description', data.site_description);
+    applyMeta('name', 'name', 'twitter:description', data.site_description);
+  }
+
+  if (data.favicon_url) {
+    let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = data.favicon_url;
+  }
+
+  if (data.og_image_url) {
+    applyMeta('property', 'property', 'og:image', data.og_image_url);
+    applyMeta('name', 'name', 'twitter:image', data.og_image_url);
+    applyMeta('name', 'name', 'twitter:card', 'summary_large_image');
+  }
+}
 
 export default function App() {
   const [contactOpen, setContactOpen] = useState(false);
@@ -16,6 +60,10 @@ export default function App() {
     lineHeight: 1.7,
   });
   const [panelOpen, setPanelOpen] = useState(true);
+
+  useEffect(() => {
+    loadAndApplySiteSettings();
+  }, []);
 
   useEffect(() => {
     const reveals = document.querySelectorAll('.reveal');
